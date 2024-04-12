@@ -6,7 +6,6 @@ import com.Astar.tools.TcpConnectionTool;
 import com.Astar.type.TransferType;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -44,18 +43,25 @@ public class App {
                     transferType = TransferType.CLIENT;
                     break;
                 default:
-                    while (true) {
-                        Log.error("传输类型错误\n");
-                        Log.info("请重新输入：\n");
-                        String s = sc.nextLine();
-                        if (Constant.Param.CLIENT.equals(s)) {
-                            transferType = TransferType.CLIENT;
-                            break;
-                        } else if (Constant.Param.SERVER.equals(s)) {
-                            transferType = TransferType.SERVER;
-                            break;
-                        }
-                    }
+                    Log.error("传输类型错误\n");
+                    getTransferType();
+                    break;
+            }
+        } else {
+            getTransferType();
+        }
+    }
+
+    private static void getTransferType() {
+        while (true) {
+            Log.info("请输入传输类型：\n");
+            String s = sc.nextLine();
+            if (Constant.Param.CLIENT.equals(s)) {
+                transferType = TransferType.CLIENT;
+                break;
+            } else if (Constant.Param.SERVER.equals(s)) {
+                transferType = TransferType.SERVER;
+                break;
             }
         }
     }

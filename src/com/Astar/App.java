@@ -3,12 +3,12 @@ package com.Astar;
 import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
 import com.Astar.resource.ResourceFactory;
+import com.Astar.threadClass.ServerSocketManager;
 import com.Astar.tools.TcpConnectionTool;
 import com.Astar.type.TransferType;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -28,9 +28,6 @@ public class App {
 
         // 判断传输的类型
         initTransferType();
-
-        // 初始化需要传输或接受的文件
-
 
         switch (transferType) {
             case CLIENT:
@@ -66,29 +63,38 @@ public class App {
         // 启动服务器
         startServer();
 
-        // 开始接受客户端请求
-        ServerSocket serverSocket = ResourceFactory.serverSocket;
-        try {
-            Socket socket = serverSocket.accept();
-            // 将接收到的请求加入到集合中，方便管理
-            ResourceFactory.asServerSockets.add(socket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // 接受服务端的请求
+        receiveSocket();
+    }
+
+    private static void receiveSocket() {
+        // 创建一个管理线程
+        Thread t = new Thread(new ServerSocketManager(
+                // 判断后传入切片数量
+                paramMap != null && paramMap.containsKey(Constant.Param.SLICE_NUM) ?
+                        Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)) :
+                        Constant.File.DEFAULT_SLICE_NUM
+        ));
+        // 设置为守护线程
+        t.setDaemon(true);
+        // 启动管理线程负责接收客户端的请求
+        t.start();
     }
 
     private static void startServer() {
         // 开始启动服务端
-        boolean flag = false;
-        if (paramMap.get(Constant.Param.PORT) == null) {
-            flag = TcpConnectionTool.initServer(Constant.Server.PORT);
-        } else {
+        boolean flag;
+        if (paramMap.containsKey(Constant.Param.PORT)) {
+            // 使用传入的端口启动服务端
             flag = TcpConnectionTool.initServer(Integer.parseInt(paramMap.get(Constant.Param.PORT)));
+        } else {
+            // 使用默认端口启动服务端
+            flag = TcpConnectionTool.initServer(Constant.Server.DEFAULT_PORT);
         }
 
         // 检查是否启动成功
         if (flag) {
-            Log.info("服务器IP地址：%s\n", TcpConnectionTool.getIPAddress());
+            Log.info("服务器IP地址：{}\n", TcpConnectionTool.getIPAddress());
             Log.info("服务器启动成功，等待客户端连接...\n");
         } else {
             Log.error("服务器启动失败，请检查端口是否被占用\n");
@@ -96,7 +102,55 @@ public class App {
     }
 
     private static void asClient() {
+        // 未传入主机ip
+        if (paramMap != null && !paramMap.containsKey(Constant.Param.IP)) {
+            getIP();
+        }
 
+        // 已经传入主机ip，同时也传入了切片数量
+        if (paramMap != null && paramMap.containsKey(Constant.Param.IP) && paramMap.containsKey(Constant.Param.SLICE_NUM)) {
+            // 按照传入的切片数量创建socket
+            for (int i = 0; i < Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)); i++) {
+                createClientSocket();
+            }
+        }
+
+        // 已经传入主机ip，但是未传入切片数量
+        if (paramMap != null && paramMap.containsKey(Constant.Param.IP) && !paramMap.containsKey(Constant.Param.SLICE_NUM)) {
+            // 按照传入的切片数量创建socket
+            for (int i = 0; i < Constant.File.DEFAULT_SLICE_NUM; i++) {
+                createClientSocket();
+            }
+        }
+    }
+
+    private static void createClientSocket() {
+        try {
+            Socket socket = new Socket(
+                    paramMap.get(Constant.Param.IP),
+                    // 检测如果传入了端口，则使用传入的端口，否则使用默认端口
+                    paramMap.containsKey(Constant.Param.PORT) ?
+                            Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
+                            Constant.Server.DEFAULT_PORT);
+            ResourceFactory.asClientSockets.add(socket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void getIP() {
+        while (true) {
+            Log.info("请输入主机ip：\n");
+            String ip = sc.nextLine();
+            if (ip != null && ip.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
+                // 输入正确，进入下一步
+                paramMap.put(Constant.Param.IP, ip);
+                break;
+            }
+
+            // 输入错误，重新输入
+            Log.error("主机ip错误\n");
+        }
     }
 
     private static void initTransferType() {
@@ -217,17 +271,29 @@ public class App {
                 if (param.length != 2) {
                     continue;
                 }
-                // 判断是否是文件路径
-                if (Constant.Param.PATH.equals(param[0])) {
-                    paramMap.put(Constant.Param.PATH, param[1]);
-                }
-                // 判断是否是传输类型
-                if (Constant.Param.TYPE_TRANSFER.equalsIgnoreCase(param[0])) {
-                    paramMap.put(Constant.Param.TYPE_TRANSFER, param[1]);
-                }
-                // 判断是否是端口号
-                if (Constant.Param.PORT.equalsIgnoreCase(param[0])) {
-                    paramMap.put(Constant.Param.PORT, param[1]);
+                switch (param[0].toLowerCase()) {
+                    case Constant.Param.PATH:
+                        // 文件路径参数
+                        paramMap.put(Constant.Param.PATH, param[1]);
+                        break;
+                    case Constant.Param.TYPE_TRANSFER:
+                        // 传输类型参数
+                        paramMap.put(Constant.Param.TYPE_TRANSFER, param[1]);
+                        break;
+                    case Constant.Param.PORT:
+                        // 端口号参数
+                        paramMap.put(Constant.Param.PORT, param[1]);
+                        break;
+                    case Constant.Param.IP:
+                        // ip地址参数
+                        paramMap.put(Constant.Param.IP, param[1]);
+                        break;
+                    case Constant.Param.SLICE_NUM:
+                        // 切片数量参数
+                        paramMap.put(Constant.Param.SLICE_NUM, param[1]);
+                        break;
+                    default:
+                        break;
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.Astar.threadClass;
 
+import com.Astar.infoClass.Log;
 import com.Astar.resource.ResourceFactory;
 
 import java.io.IOException;
@@ -25,7 +26,8 @@ public class ServerSocketManager implements Runnable {
                 ResourceFactory.asServerSockets.add(socket);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("超时仍未有客户端连接，自动退出程序...");
+            System.exit(0);
         }
     }
 }

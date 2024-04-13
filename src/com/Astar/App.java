@@ -14,13 +14,13 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class App {
-    public static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = new Scanner(System.in);
 
-    public static File file;
+    private static File file;
 
-    public static TransferType transferType;
+    private static TransferType transferType;
 
-    public static HashMap<String, String> paramMap;
+    private static HashMap<String, String> paramMap;
 
     public static void main(String[] args) {
         // 获取用户需要传输的文件 以及需要作为服务端还是客户端的参数
@@ -57,6 +57,15 @@ public class App {
                 Log.error("发生异常，程序退出...\n");
                 break;
         }
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        paramMap.forEach((k, v) -> Log.info("{}: {}\n", k, v));
+        Log.info("{}\n", ResourceFactory.asServerSockets);
+        Log.info("{}\n", ResourceFactory.asClientSockets);
     }
 
     private static void asServer() {
@@ -84,7 +93,7 @@ public class App {
     private static void startServer() {
         // 开始启动服务端
         boolean flag;
-        if (paramMap.containsKey(Constant.Param.PORT)) {
+        if (paramMap != null && paramMap.containsKey(Constant.Param.PORT)) {
             // 使用传入的端口启动服务端
             flag = TcpConnectionTool.initServer(Integer.parseInt(paramMap.get(Constant.Param.PORT)));
         } else {
@@ -193,6 +202,7 @@ public class App {
             // 初始化需要传输的文件
             file = new File(paramMap.get("path"));
             if (!file.exists() || file.isFile()) {
+                Log.error("{} 不是一个文件夹\n", paramMap.get("path"));
                 file = null;
                 getDirPath();
             }
@@ -207,7 +217,7 @@ public class App {
             String filePath = sc.nextLine();
             try {
                 file = new File(filePath);
-                if (!file.exists() || file.isDirectory()) {
+                if (!file.exists() || file.isFile()) {
                     Log.error("{} 不是一个文件夹\n", filePath);
                     Log.info("请重新输入：\n");
                     file = null;
@@ -255,7 +265,8 @@ public class App {
     public static HashMap<String, String> processArgs(String[] args) {
         // 判断是否是空参数
         if (args == null || args.length == 0) {
-            return null;
+            // 初始化一个空的map
+            return new HashMap<>();
         }
 
         // 遍历寻找参数

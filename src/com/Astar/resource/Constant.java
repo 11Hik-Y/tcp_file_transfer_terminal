@@ -36,6 +36,6 @@ public final class Constant {
         public static final int DEFAULT_PORT = 6666;
 
         // 默认超时时间
-        public static final int TIME_OUT = 10 * 1000;
+        public static final int TIME_OUT = 30 * 1000;
     }
 }

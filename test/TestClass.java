@@ -1,6 +1,5 @@
 import com.Astar.infoClass.FileSliceInfo;
 import com.Astar.infoClass.Log;
-import com.Astar.resource.Constant;
 import com.Astar.tools.FileSliceTool;
 import com.Astar.tools.TcpConnectionTool;
 import org.junit.Test;

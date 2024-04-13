@@ -10,6 +10,9 @@ public final class Constant {
         // 路径参数
         public static final String PATH = "path";
 
+        // 端口号
+        public static final String PORT = "port";
+
         // 传输类型
         public static final String TYPE_TRANSFER = "type";
         public static final String SERVER = "server";

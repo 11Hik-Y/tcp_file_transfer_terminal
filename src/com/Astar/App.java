@@ -1,15 +1,18 @@
 package com.Astar;
 
+import com.Astar.infoClass.FileSliceInfo;
 import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
 import com.Astar.resource.ResourceFactory;
 import com.Astar.threadClass.ServerSocketManager;
+import com.Astar.tools.FileSliceTool;
 import com.Astar.tools.TcpConnectionTool;
 import com.Astar.type.TransferType;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -29,6 +32,7 @@ public class App {
         // 判断传输的类型
         initTransferType();
 
+        // 根据传输类型初始化文件位置或文件夹位置
         switch (transferType) {
             case CLIENT:
                 // 选择接收文件的位置
@@ -58,14 +62,11 @@ public class App {
                 break;
         }
 
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        paramMap.forEach((k, v) -> Log.info("{}: {}\n", k, v));
-        Log.info("{}\n", ResourceFactory.asServerSockets);
-        Log.info("{}\n", ResourceFactory.asClientSockets);
+        // 此时已经接受好两端的连接，开始对文件进行处理，得到切分文件的相关信息
+        ArrayList<FileSliceInfo> fileSliceInfos = FileSliceTool.fileSlice(
+                paramMap.get(Constant.Param.PATH),
+                Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)));
+        Log.info("切分文件成功，切分后的文件信息为 {}\n" + fileSliceInfos);
     }
 
     private static void asServer() {

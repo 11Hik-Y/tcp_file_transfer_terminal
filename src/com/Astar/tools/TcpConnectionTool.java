@@ -1,5 +1,6 @@
 package com.Astar.tools;
 
+import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
 import com.Astar.resource.ResourceFactory;
 
@@ -18,6 +19,15 @@ public class TcpConnectionTool {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public static void closeServer() {
+        try {
+            ResourceFactory.serverSocket.close();
+        } catch (IOException e) {
+            Log.error("关闭服务器失败，程序退出...\n");
+            System.exit(-1);
         }
     }
 

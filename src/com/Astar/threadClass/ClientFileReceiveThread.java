@@ -10,10 +10,12 @@ import java.net.Socket;
 public class ClientFileReceiveThread implements Runnable {
     private final String dirPath;
     private final Socket socket;
+    private final TransferInfoThread transferInfoThread;
 
-    public ClientFileReceiveThread(String dirPath, Socket socket) {
+    public ClientFileReceiveThread(String dirPath, Socket socket, TransferInfoThread transferInfoThread) {
         this.dirPath = dirPath;
         this.socket = socket;
+        this.transferInfoThread = transferInfoThread;
     }
 
     @Override
@@ -34,7 +36,7 @@ public class ClientFileReceiveThread implements Runnable {
             bos.flush();
 
             // 根据文件名和路径去创建文件
-            raf = new RandomAccessFile(dirPath + "\\" + fileSliceInfo.getFileName(), "w");
+            raf = new RandomAccessFile(dirPath + "\\" + fileSliceInfo.getFileName(), "rw");
 
             // 定位要处理的文件的位置
             raf.seek(fileSliceInfo.getSliceStartIndex());
@@ -43,15 +45,17 @@ public class ClientFileReceiveThread implements Runnable {
             byte[] buffer = new byte[Constant.Param.DEFAULT_BUFFER_SIZE];
             int len;
             long total = 0;
-            while ((len = ois.read(buffer)) != -1){
-                if (total + len > fileSliceInfo.getSliceSize()){
+            while ((len = ois.read(buffer)) != -1) {
+                if (total + len > fileSliceInfo.getSliceSize()) {
                     len = (int) (fileSliceInfo.getSliceSize() - total + 1);
                 }
                 raf.write(buffer, 0, len);
                 total += len;
+                transferInfoThread.addTransferSize(len);
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error("传输发生异常，程序终止...");
             System.exit(-1);
         } finally {

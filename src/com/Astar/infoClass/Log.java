@@ -1,5 +1,7 @@
 package com.Astar.infoClass;
 
+import com.Astar.type.ColorType;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,8 +11,8 @@ public class Log {
         print("INFO", msg, args);
     }
 
-    public static void info(String msg, String color, Object... args) {
-        System.out.print(color);
+    public static void info(String msg, ColorType color, Object... args) {
+        System.out.print(color.getColor());
         print("INFO", msg, args);
     }
 
@@ -18,8 +20,8 @@ public class Log {
         print("ERROR", msg, args);
     }
 
-    public static void error(String msg, String color, Object... args) {
-        System.out.print(color);
+    public static void error(String msg, ColorType color, Object... args) {
+        System.out.print(color.getColor());
         print("ERROR", msg, args);
     }
 

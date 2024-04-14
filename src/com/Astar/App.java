@@ -5,6 +5,7 @@ import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
 import com.Astar.resource.ResourceFactory;
 import com.Astar.threadClass.ClientFileReceiveThread;
+import com.Astar.threadClass.TransferInfoThread;
 import com.Astar.threadClass.ServerFileTransferThread;
 import com.Astar.threadClass.ServerSocketManager;
 import com.Astar.tools.FileSliceTool;
@@ -13,10 +14,15 @@ import com.Astar.type.TransferType;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class App {
     private static final Scanner sc = new Scanner(System.in);
@@ -26,6 +32,8 @@ public class App {
     private static TransferType transferType;
 
     private static HashMap<String, String> paramMap;
+
+    private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     public static void main(String[] args) {
         // 获取用户需要传输的文件 以及需要作为服务端还是客户端的参数
@@ -49,6 +57,11 @@ public class App {
                 break;
         }
 
+        // 获取文件的切片数量
+        int sliceNum = paramMap != null && paramMap.containsKey(Constant.Param.SLICE_NUM) ?
+                Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)) :
+                Constant.File.DEFAULT_SLICE_NUM;
+
         // 根据传输类型选择启动服务端或者客户端
         switch (transferType) {
             case CLIENT:
@@ -57,7 +70,7 @@ public class App {
                 break;
             case SERVER:
                 // 启动服务端
-                asServer();
+                asServer(sliceNum);
                 break;
             default:
                 Log.error("发生异常，程序退出...\n");
@@ -67,78 +80,85 @@ public class App {
         // 此时已经接受好两端的连接，开始对文件进行处理，得到切分文件的相关信息
         ArrayList<FileSliceInfo> fileSliceInfos = FileSliceTool.fileSlice(
                 paramMap.get(Constant.Param.PATH),
-                Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)));
+                sliceNum);
 
-        // 获取文件的切片数量
-        int sliceNum = paramMap != null && paramMap.containsKey(Constant.Param.SLICE_NUM) ?
-                Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)) :
-                Constant.File.DEFAULT_SLICE_NUM;
-
-        // 根据发送类型创建相应的线程
+        // 根据发送类型创建相应的线程（使用线程池），并提供一个线程类计算文件传输信息
+        TransferInfoThread transferInfoThread = new TransferInfoThread(file.length());
+        ExecutorService pool = Executors.newFixedThreadPool(sliceNum);
         switch (transferType) {
             case CLIENT:
-                startClientReceiver(sliceNum);
+                // 启动客户端文件接收线程
+                for (int i = 0; i < sliceNum; i++) {
+                    pool.execute(
+                            new ClientFileReceiveThread(
+                                    file.getAbsolutePath(),
+                                    ResourceFactory.asClientSockets.get(i),
+                                    transferInfoThread
+                            )
+                    );
+                }
                 break;
             case SERVER:
-                startServerTransfer(fileSliceInfos, sliceNum);
+                // 启动服务端文件发送线程
+                for (int i = 0; i < sliceNum; i++) {
+                    pool.execute(
+                            new ServerFileTransferThread(
+                                    fileSliceInfos.get(i),
+                                    ResourceFactory.asServerSockets.get(i),
+                                    transferInfoThread
+                            )
+                    );
+                }
                 break;
             default:
                 Log.error("发生异常，程序退出...\n");
                 break;
         }
 
-        // 等待文件发送完毕
+        // 每隔一秒统计一次文件的下载情况
+        executor.scheduleAtFixedRate(transferInfoThread, 1, 1, TimeUnit.SECONDS);
 
-    }
-
-    private static void startClientReceiver(int sliceNum) {
-        // 启动客户端文件接收线程
-        for (int i = 0; i < sliceNum; i++) {
-            Thread t = new Thread(
-                    new ClientFileReceiveThread(
-                            file.getPath(),
-                            ResourceFactory.asClientSockets.get(i)
-                    )
-            );
-            t.setDaemon(true);
-            t.start();
+        for (; ; ) {
+            // 获取用户输入
+            String input = sc.nextLine();
+            // 如果输入为空，则继续等待
+            if (input.isEmpty()) {
+                continue;
+            }
+            // 如果输入为exit，则退出程序
+            if (input.equals("exit")) {
+                // 关闭线程池
+                pool.shutdown();
+                // 关闭管理线程
+                executor.shutdown();
+                // 关闭服务端
+                TcpConnectionTool.closeServer();
+            }
         }
     }
 
-    private static void startServerTransfer(ArrayList<FileSliceInfo> fileSliceInfos, int sliceNum) {
-        // 启动服务端文件发送线程
-        for (int i = 0; i < sliceNum; i++) {
-            Thread t = new Thread(
-                    new ServerFileTransferThread(
-                            fileSliceInfos.get(i),
-                            ResourceFactory.asServerSockets.get(i)
-                    )
-            );
-            t.setDaemon(true);
-            t.start();
-        }
-    }
-
-    private static void asServer() {
+    private static void asServer(int sliceNum) {
         // 启动服务器
         startServer();
 
         // 接受服务端的请求
-        receiveSocket();
+        receiveSocket(sliceNum);
     }
 
-    private static void receiveSocket() {
-        // 创建一个管理线程
-        Thread t = new Thread(new ServerSocketManager(
-                // 判断后传入切片数量
-                paramMap != null && paramMap.containsKey(Constant.Param.SLICE_NUM) ?
-                        Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)) :
-                        Constant.File.DEFAULT_SLICE_NUM
-        ));
-        // 设置为守护线程
-        t.setDaemon(true);
-        // 启动管理线程负责接收客户端的请求
-        t.start();
+    private static void receiveSocket(int sliceNum) {
+        // 开始接受客户端请求
+        ServerSocket serverSocket = ResourceFactory.serverSocket;
+        try {
+            // 等待接收到足够的线程数量就停止
+            while (ResourceFactory.asServerSockets.size() < sliceNum) {
+                Socket socket = serverSocket.accept();
+                // 将接收到的请求加入到集合中，方便管理
+                ResourceFactory.asServerSockets.add(socket);
+            }
+        } catch (IOException e) {
+            Log.error("超时仍未有客户端连接，自动退出程序...");
+            System.exit(0);
+        }
     }
 
     private static void startServer() {
@@ -186,12 +206,9 @@ public class App {
 
     private static void createClientSocket() {
         try {
-            Socket socket = new Socket(
-                    paramMap.get(Constant.Param.IP),
+            Socket socket = new Socket(paramMap.get(Constant.Param.IP),
                     // 检测如果传入了端口，则使用传入的端口，否则使用默认端口
-                    paramMap.containsKey(Constant.Param.PORT) ?
-                            Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
-                            Constant.Server.DEFAULT_PORT);
+                    paramMap.containsKey(Constant.Param.PORT) ? Integer.parseInt(paramMap.get(Constant.Param.PORT)) : Constant.Server.DEFAULT_PORT);
             ResourceFactory.asClientSockets.add(socket);
         } catch (IOException e) {
             e.printStackTrace();
@@ -202,7 +219,7 @@ public class App {
         while (true) {
             Log.info("请输入主机ip：\n");
             String ip = sc.nextLine();
-            if (ip != null && ip.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
+            if (ip != null && ip.matches("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(localhost)")) {
                 // 输入正确，进入下一步
                 paramMap.put(Constant.Param.IP, ip);
                 break;
@@ -279,6 +296,7 @@ public class App {
                 file = null;
             }
         }
+        paramMap.put(Constant.Param.PATH, file.getAbsolutePath());
     }
 
     private static void initTransferFile() {
@@ -311,6 +329,7 @@ public class App {
                 file = null;
             }
         }
+        paramMap.put(Constant.Param.PATH, file.getAbsolutePath());
     }
 
     public static HashMap<String, String> processArgs(String[] args) {

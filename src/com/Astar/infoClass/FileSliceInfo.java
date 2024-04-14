@@ -3,6 +3,8 @@ package com.Astar.infoClass;
 import java.io.Serializable;
 
 public class FileSliceInfo implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     // 切片文件路径
     private String filePath;
     // 切片文件名

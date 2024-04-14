@@ -11,9 +11,12 @@ public class ServerFileTransferThread implements Runnable {
     private final FileSliceInfo fileSliceInfo;
     private final Socket socket;
 
-    public ServerFileTransferThread(FileSliceInfo fileSliceInfo, Socket socket) {
+    private final TransferInfoThread transferInfoThread;
+
+    public ServerFileTransferThread(FileSliceInfo fileSliceInfo, Socket socket, TransferInfoThread transferInfoThread) {
         this.fileSliceInfo = fileSliceInfo;
         this.socket = socket;
+        this.transferInfoThread = transferInfoThread;
     }
 
     @Override
@@ -30,10 +33,8 @@ public class ServerFileTransferThread implements Runnable {
             oos.writeObject(fileSliceInfo);
 
             // 等待接收客户端的确认
-            if (bis.read() != Constant.Param.COMPLETE) {
-                // 未读取到正确信息，直接退出程序
-                Log.error("传输发生异常，程序终止...");
-                System.exit(-1);
+            while (bis.read() != Constant.Param.COMPLETE) {
+                continue;
             }
 
             // 定位要读取文件的对应位置
@@ -45,15 +46,17 @@ public class ServerFileTransferThread implements Runnable {
             long total = 0;
             while ((len = raf.read(buffer)) != -1) {
                 // 如果读取到的数据大于分片文件大小，则只读取到分片文件的大小即可
-                if (total + len > fileSliceInfo.getSliceSize()){
+                if (total + len > fileSliceInfo.getSliceSize()) {
                     len = (int) (fileSliceInfo.getSliceSize() - total + 1);
                 }
                 oos.write(buffer, 0, len);
                 total += len;
+                transferInfoThread.addTransferSize(len);
             }
             // 刷新缓冲区
             oos.flush();
         } catch (IOException e) {
+            e.printStackTrace();
             Log.error("传输发生异常，程序终止...");
             System.exit(-1);
         } finally {

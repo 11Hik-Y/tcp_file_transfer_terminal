@@ -7,7 +7,6 @@ import com.Astar.resource.ResourceFactory;
 import com.Astar.threadClass.ClientFileReceiveThread;
 import com.Astar.threadClass.TransferInfoThread;
 import com.Astar.threadClass.ServerFileTransferThread;
-import com.Astar.threadClass.ServerSocketManager;
 import com.Astar.tools.FileSliceTool;
 import com.Astar.tools.TcpConnectionTool;
 import com.Astar.type.TransferType;

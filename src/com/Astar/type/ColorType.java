@@ -19,9 +19,9 @@ public enum ColorType {
     ANSI_CYAN_BACKGROUND("\u001B[46m"),
     ANSI_WHITE_BACKGROUND("\u001B[47m");
 
-    private String color;
+    private final String color;
 
-    private ColorType(String color) {
+    ColorType(String color) {
         this.color = color;
     }
 

@@ -1,12 +1,16 @@
 package com.Astar.infoClass;
 
-public class FileSliceInfo {
+import java.io.Serializable;
+
+public class FileSliceInfo implements Serializable {
+    // 切片文件路径
+    private String filePath;
     // 切片文件名
     private String fileName;
     // 总文件大小
     private long fileSize;
     // 切片编号
-    private long sliceNum;
+    private int sliceNum;
     // 切片大小
     private long sliceSize;
     // 切片开始索引
@@ -18,7 +22,8 @@ public class FileSliceInfo {
     public FileSliceInfo() {
     }
 
-    public FileSliceInfo(String fileName, long fileSize, long sliceNum, long sliceSize, long sliceStartIndex, long sliceEndIndex) {
+    public FileSliceInfo(String filePath, String fileName, long fileSize, int sliceNum, long sliceSize, long sliceStartIndex, long sliceEndIndex) {
+        this.filePath = filePath;
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.sliceNum = sliceNum;
@@ -29,6 +34,25 @@ public class FileSliceInfo {
 
     /**
      * 获取
+     *
+     * @return filePath
+     */
+    public String getFilePath() {
+        return filePath;
+    }
+
+    /**
+     * 设置
+     *
+     * @param filePath
+     */
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    /**
+     * 获取
+     *
      * @return fileName
      */
     public String getFileName() {
@@ -37,6 +61,7 @@ public class FileSliceInfo {
 
     /**
      * 设置
+     *
      * @param fileName
      */
     public void setFileName(String fileName) {
@@ -45,6 +70,7 @@ public class FileSliceInfo {
 
     /**
      * 获取
+     *
      * @return fileSize
      */
     public long getFileSize() {
@@ -53,6 +79,7 @@ public class FileSliceInfo {
 
     /**
      * 设置
+     *
      * @param fileSize
      */
     public void setFileSize(long fileSize) {
@@ -61,22 +88,25 @@ public class FileSliceInfo {
 
     /**
      * 获取
+     *
      * @return sliceNum
      */
-    public long getSliceNum() {
+    public int getSliceNum() {
         return sliceNum;
     }
 
     /**
      * 设置
+     *
      * @param sliceNum
      */
-    public void setSliceNum(long sliceNum) {
+    public void setSliceNum(int sliceNum) {
         this.sliceNum = sliceNum;
     }
 
     /**
      * 获取
+     *
      * @return sliceSize
      */
     public long getSliceSize() {
@@ -85,6 +115,7 @@ public class FileSliceInfo {
 
     /**
      * 设置
+     *
      * @param sliceSize
      */
     public void setSliceSize(long sliceSize) {
@@ -93,6 +124,7 @@ public class FileSliceInfo {
 
     /**
      * 获取
+     *
      * @return sliceStartIndex
      */
     public long getSliceStartIndex() {
@@ -101,6 +133,7 @@ public class FileSliceInfo {
 
     /**
      * 设置
+     *
      * @param sliceStartIndex
      */
     public void setSliceStartIndex(long sliceStartIndex) {
@@ -109,6 +142,7 @@ public class FileSliceInfo {
 
     /**
      * 获取
+     *
      * @return sliceEndIndex
      */
     public long getSliceEndIndex() {
@@ -117,6 +151,7 @@ public class FileSliceInfo {
 
     /**
      * 设置
+     *
      * @param sliceEndIndex
      */
     public void setSliceEndIndex(long sliceEndIndex) {
@@ -124,6 +159,6 @@ public class FileSliceInfo {
     }
 
     public String toString() {
-        return "FileSliceInfo{fileName = " + fileName + ", fileSize = " + fileSize + ", sliceNum = " + sliceNum + ", sliceSize = " + sliceSize + ", sliceStartIndex = " + sliceStartIndex + ", sliceEndIndex = " + sliceEndIndex + "}";
+        return "FileSliceInfo{filePath = " + filePath + ", fileName = " + fileName + ", fileSize = " + fileSize + ", sliceNum = " + sliceNum + ", sliceSize = " + sliceSize + ", sliceStartIndex = " + sliceStartIndex + ", sliceEndIndex = " + sliceEndIndex + "}";
     }
 }

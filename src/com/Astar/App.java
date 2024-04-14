@@ -4,6 +4,8 @@ import com.Astar.infoClass.FileSliceInfo;
 import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
 import com.Astar.resource.ResourceFactory;
+import com.Astar.threadClass.ClientFileReceiveThread;
+import com.Astar.threadClass.ServerFileTransferThread;
 import com.Astar.threadClass.ServerSocketManager;
 import com.Astar.tools.FileSliceTool;
 import com.Astar.tools.TcpConnectionTool;
@@ -66,7 +68,52 @@ public class App {
         ArrayList<FileSliceInfo> fileSliceInfos = FileSliceTool.fileSlice(
                 paramMap.get(Constant.Param.PATH),
                 Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)));
-        Log.info("切分文件成功，切分后的文件信息为 {}\n" + fileSliceInfos);
+
+        // 获取文件的切片数量
+        int sliceNum = paramMap != null && paramMap.containsKey(Constant.Param.SLICE_NUM) ?
+                Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)) :
+                Constant.File.DEFAULT_SLICE_NUM;
+
+        // 根据发送类型创建相应的线程
+        switch (transferType) {
+            case CLIENT:
+                startClientReceiver(sliceNum);
+                break;
+            case SERVER:
+                startServerTransfer(fileSliceInfos, sliceNum);
+                break;
+            default:
+                Log.error("发生异常，程序退出...\n");
+                break;
+        }
+    }
+
+    private static void startClientReceiver(int sliceNum) {
+        // 启动客户端文件接收线程
+        for (int i = 0; i < sliceNum; i++) {
+            Thread t = new Thread(
+                    new ClientFileReceiveThread(
+                            file.getPath(),
+                            ResourceFactory.asClientSockets.get(i)
+                    )
+            );
+            t.setDaemon(true);
+            t.start();
+        }
+    }
+
+    private static void startServerTransfer(ArrayList<FileSliceInfo> fileSliceInfos, int sliceNum) {
+        // 启动服务端文件发送线程
+        for (int i = 0; i < sliceNum; i++) {
+            Thread t = new Thread(
+                    new ServerFileTransferThread(
+                            fileSliceInfos.get(i),
+                            ResourceFactory.asServerSockets.get(i)
+                    )
+            );
+            t.setDaemon(true);
+            t.start();
+        }
     }
 
     private static void asServer() {

@@ -26,6 +26,7 @@ public class FileSliceTool {
                             (i + 1) * sliceLength - 1;
             fileSliceInfo.add(
                     new FileSliceInfo(
+                            file.getPath(),
                             file.getName(),
                             len,
                             i,

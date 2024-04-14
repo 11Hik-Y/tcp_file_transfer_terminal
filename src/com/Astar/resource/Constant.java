@@ -24,6 +24,12 @@ public final class Constant {
 
         public static final String SERVER = "server";
         public static final String CLIENT = "client";
+
+        // 定义完成字节
+        public static final byte COMPLETE = 0x0A;
+
+        // 默认缓存大小
+        public static final int DEFAULT_BUFFER_SIZE = 128 * 1024;
     }
 
     public static final class File {

@@ -38,9 +38,10 @@ public class ServerFileTransferThread implements Runnable {
 
             // 定位要读取文件的对应位置
             raf.seek(fileSliceInfo.getSliceStartIndex());
+
             // 使用循环和缓冲区读取和发送文件
             byte[] buffer = new byte[Constant.Param.DEFAULT_BUFFER_SIZE];
-            int len = -1;
+            int len;
             long total = 0;
             while ((len = raf.read(buffer)) != -1) {
                 // 如果读取到的数据大于分片文件大小，则只读取到分片文件的大小即可

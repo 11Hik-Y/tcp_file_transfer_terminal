@@ -35,12 +35,13 @@ public class ClientFileReceiveThread implements Runnable {
 
             // 根据文件名和路径去创建文件
             raf = new RandomAccessFile(dirPath + "\\" + fileSliceInfo.getFileName(), "w");
+
             // 定位要处理的文件的位置
             raf.seek(fileSliceInfo.getSliceStartIndex());
 
             // 默认128 * 1024大小的缓冲区，足够保证读取一次，接收到完整参数
             byte[] buffer = new byte[Constant.Param.DEFAULT_BUFFER_SIZE];
-            int len = -1;
+            int len;
             long total = 0;
             while ((len = ois.read(buffer)) != -1){
                 if (total + len > fileSliceInfo.getSliceSize()){

@@ -47,7 +47,7 @@ public class ServerFileTransferThread implements Runnable {
             while ((len = raf.read(buffer)) != -1) {
                 // 如果读取到的数据大于分片文件大小，则只读取到分片文件的大小即可
                 if (total + len > fileSliceInfo.getSliceSize()) {
-                    len = (int) (fileSliceInfo.getSliceSize() - total + 1);
+                    len = (int) (fileSliceInfo.getSliceSize() - total);
                 }
                 oos.write(buffer, 0, len);
                 total += len;
@@ -67,6 +67,7 @@ public class ServerFileTransferThread implements Runnable {
                 e.printStackTrace();
             }
             // 打印分片文件接收完成
+            System.out.println();
             Log.info("分片文件 {} {} 发送完成\n", fileSliceInfo.getFileName(), fileSliceInfo.getSliceNum());
         }
     }

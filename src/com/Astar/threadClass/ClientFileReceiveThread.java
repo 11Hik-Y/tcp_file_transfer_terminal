@@ -30,6 +30,8 @@ public class ClientFileReceiveThread implements Runnable {
         ) {
             // 接受FileSliceInfo对象
             fileSliceInfo = (FileSliceInfo) ois.readObject();
+            // 重新设置一下文件的大小
+            transferInfoThread.setTotalSize(fileSliceInfo.getFileSize());
 
             // 发送接受完成信号
             bos.write(Constant.Param.COMPLETE);
@@ -47,7 +49,7 @@ public class ClientFileReceiveThread implements Runnable {
             long total = 0;
             while ((len = ois.read(buffer)) != -1) {
                 if (total + len > fileSliceInfo.getSliceSize()) {
-                    len = (int) (fileSliceInfo.getSliceSize() - total + 1);
+                    len = (int) (fileSliceInfo.getSliceSize() - total);
                 }
                 raf.write(buffer, 0, len);
                 total += len;
@@ -68,6 +70,7 @@ public class ClientFileReceiveThread implements Runnable {
                 e.printStackTrace();
             }
             // 打印分片文件接收完成
+            System.out.println();
             Log.info("分片文件 {} {} 接收完成\n", fileSliceInfo.getFileName(), fileSliceInfo.getSliceNum());
         }
     }

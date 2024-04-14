@@ -76,16 +76,13 @@ public class App {
                 break;
         }
 
-        // 此时已经接受好两端的连接，开始对文件进行处理，得到切分文件的相关信息
-        ArrayList<FileSliceInfo> fileSliceInfos = FileSliceTool.fileSlice(
-                paramMap.get(Constant.Param.PATH),
-                sliceNum);
-
-        // 根据发送类型创建相应的线程（使用线程池），并提供一个线程类计算文件传输信息
-        TransferInfoThread transferInfoThread = new TransferInfoThread(file.length());
+        // 根据发送类型创建相应的线程（使用线程池）
+        TransferInfoThread transferInfoThread = null;
         ExecutorService pool = Executors.newFixedThreadPool(sliceNum);
         switch (transferType) {
             case CLIENT:
+                // 创建客户端文件传输信息线程
+                transferInfoThread = new TransferInfoThread(-1);
                 // 启动客户端文件接收线程
                 for (int i = 0; i < sliceNum; i++) {
                     pool.execute(
@@ -98,6 +95,12 @@ public class App {
                 }
                 break;
             case SERVER:
+                // 创建服务端文件传输信息线程
+                transferInfoThread = new TransferInfoThread(file.length());
+                // 切片好文件提供给服务端
+                ArrayList<FileSliceInfo> fileSliceInfos = FileSliceTool.fileSlice(
+                        paramMap.get(Constant.Param.PATH),
+                        sliceNum);
                 // 启动服务端文件发送线程
                 for (int i = 0; i < sliceNum; i++) {
                     pool.execute(
@@ -117,23 +120,33 @@ public class App {
         // 每隔一秒统计一次文件的下载情况
         executor.scheduleAtFixedRate(transferInfoThread, 1, 1, TimeUnit.SECONDS);
 
-        for (; ; ) {
-            // 获取用户输入
-            String input = sc.nextLine();
-            // 如果输入为空，则继续等待
-            if (input.isEmpty()) {
-                continue;
-            }
-            // 如果输入为exit，则退出程序
-            if (input.equals("exit")) {
-                // 关闭线程池
-                pool.shutdown();
-                // 关闭管理线程
-                executor.shutdown();
-                // 关闭服务端
-                TcpConnectionTool.closeServer();
+        // 判断是否传输结束
+        while (!transferInfoThread.isDone()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
+        // 程序结束
+        end(pool);
+    }
+
+    public static void end(ExecutorService pool) {
+        // 关闭线程池
+        executor.shutdownNow();
+        try {
+            // 关闭线程池
+            pool.shutdown();
+            if (pool.awaitTermination(2, TimeUnit.SECONDS)) {
+                pool.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println();
+        Log.info("文件传输完毕，程序退出...\n");
     }
 
     private static void asServer(int sliceNum) {
@@ -205,9 +218,14 @@ public class App {
 
     private static void createClientSocket() {
         try {
-            Socket socket = new Socket(paramMap.get(Constant.Param.IP),
+            Socket socket = new Socket(
+                    // 主机ip
+                    paramMap.get(Constant.Param.IP),
                     // 检测如果传入了端口，则使用传入的端口，否则使用默认端口
-                    paramMap.containsKey(Constant.Param.PORT) ? Integer.parseInt(paramMap.get(Constant.Param.PORT)) : Constant.Server.DEFAULT_PORT);
+                    paramMap.containsKey(Constant.Param.PORT) ?
+                            Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
+                            Constant.Server.DEFAULT_PORT
+            );
             ResourceFactory.asClientSockets.add(socket);
         } catch (IOException e) {
             e.printStackTrace();

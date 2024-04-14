@@ -50,4 +50,11 @@ public final class Constant {
         // 默认超时时间
         public static final int TIME_OUT = 30 * 1000;
     }
+    public static final class Client {
+        // 默认端口
+        public static final int DEFAULT_PORT = 6666;
+
+        // 默认超时时间
+        public static final int TIME_OUT = 30 * 1000;
+    }
 }

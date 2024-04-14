@@ -86,6 +86,9 @@ public class App {
                 Log.error("发生异常，程序退出...\n");
                 break;
         }
+
+        // 等待文件发送完毕
+
     }
 
     private static void startClientReceiver(int sliceNum) {

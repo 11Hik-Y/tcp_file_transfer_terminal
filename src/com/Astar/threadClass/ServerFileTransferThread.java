@@ -6,6 +6,8 @@ import com.Astar.resource.Constant;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ServerFileTransferThread implements Runnable {
     private final FileSliceInfo fileSliceInfo;
@@ -40,7 +42,7 @@ public class ServerFileTransferThread implements Runnable {
             // 定位要读取文件的对应位置
             raf.seek(fileSliceInfo.getSliceStartIndex());
 
-            // 使用循环和缓冲区读取和发送文件
+            // 缓冲区读取和发送文件
             byte[] buffer = new byte[Constant.Param.DEFAULT_BUFFER_SIZE];
             int len;
             long total = 0;
@@ -67,7 +69,7 @@ public class ServerFileTransferThread implements Runnable {
                 e.printStackTrace();
             }
             // 打印分片文件接收完成
-            System.out.println();
+            System.out.print("\r");
             Log.info("分片文件 {} {} 发送完成\n", fileSliceInfo.getFileName(), fileSliceInfo.getSliceNum());
         }
     }

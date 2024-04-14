@@ -70,7 +70,7 @@ public class ClientFileReceiveThread implements Runnable {
                 e.printStackTrace();
             }
             // 打印分片文件接收完成
-            System.out.println();
+            System.out.print("\r");
             Log.info("分片文件 {} {} 接收完成\n", fileSliceInfo.getFileName(), fileSliceInfo.getSliceNum());
         }
     }

@@ -6,8 +6,6 @@ import com.Astar.resource.Constant;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ServerFileTransferThread implements Runnable {
     private final FileSliceInfo fileSliceInfo;

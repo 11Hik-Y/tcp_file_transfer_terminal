@@ -214,6 +214,8 @@ public class App {
                 createClientSocket();
             }
         }
+
+        Log.info("客户端启动成功，准备接收文件...\n");
     }
 
     private static void createClientSocket() {

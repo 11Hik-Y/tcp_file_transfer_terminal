@@ -52,7 +52,7 @@ public class TransferInfoThread implements Runnable {
         // 已下载的大小
         String currentFileSize = String.format("%.2f", transferSize.doubleValue() / Constant.Param.MB);
 
-        String downInfo = String.format("文件大小：%s MB，已传输：%s MB，速度：%s KB/s，剩余：%.2f MB，剩余时间：%s s",
+        String downInfo = String.format("文件大小：%s MB，已传输：%s MB，速度：%s KB/s，剩余：%.2f MB，剩余时间：%s s\t\t",
                 fileSize, currentFileSize, speed, remainSize / Constant.Param.MB, remainTime);
 
         System.out.print("\r" + downInfo);

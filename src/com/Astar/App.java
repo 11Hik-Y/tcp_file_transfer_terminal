@@ -321,6 +321,7 @@ public class App {
             // 初始化需要传输的文件
             file = new File(paramMap.get(Constant.Param.PATH));
             if (!file.exists() || file.isDirectory()) {
+                Log.error("{} 不是一个文件\n", paramMap.get(Constant.Param.PATH));
                 file = null;
                 getFilePath();
             }
@@ -372,7 +373,10 @@ public class App {
                 switch (param[0].toLowerCase()) {
                     case Constant.Param.PATH:
                         // 文件路径参数
-                        paramMap.put(Constant.Param.PATH, param[1]);
+                        String s = param[1].endsWith("\"") && param[1].startsWith("\"") ?
+                                param[1].substring(1, param[1].length() - 1) :
+                                param[1];
+                        paramMap.put(Constant.Param.PATH, s);
                         break;
                     case Constant.Param.TYPE_TRANSFER:
                         // 传输类型参数

@@ -1,6 +1,5 @@
 package com.Astar.threadClass;
 
-import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
 
 import java.util.concurrent.atomic.LongAdder;

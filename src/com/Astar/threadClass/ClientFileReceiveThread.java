@@ -11,11 +11,13 @@ public class ClientFileReceiveThread implements Runnable {
     private final String dirPath;
     private final Socket socket;
     private final TransferInfoThread transferInfoThread;
+    private final int bufferSize;
 
-    public ClientFileReceiveThread(String dirPath, Socket socket, TransferInfoThread transferInfoThread) {
+    public ClientFileReceiveThread(String dirPath, Socket socket, TransferInfoThread transferInfoThread, int bufferSize) {
         this.dirPath = dirPath;
         this.socket = socket;
         this.transferInfoThread = transferInfoThread;
+        this.bufferSize = bufferSize * 1024;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class ClientFileReceiveThread implements Runnable {
             raf.seek(fileSliceInfo.getSliceStartIndex());
 
             // 默认128 * 1024大小的缓冲区，足够保证读取一次，接收到完整参数
-            byte[] buffer = new byte[Constant.Param.DEFAULT_BUFFER_SIZE];
+            byte[] buffer = new byte[bufferSize];
             int len;
             long total = 0;
             while ((len = ois.read(buffer)) != -1) {

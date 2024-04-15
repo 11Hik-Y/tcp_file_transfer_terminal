@@ -10,6 +10,7 @@ import com.Astar.threadClass.TransferInfoThread;
 import com.Astar.threadClass.ServerFileTransferThread;
 import com.Astar.tools.FileSliceTool;
 import com.Astar.tools.TcpConnectionTool;
+import com.Astar.type.ColorType;
 import com.Astar.type.TransferType;
 
 import java.io.File;
@@ -91,7 +92,10 @@ public class App {
                             new ClientFileReceiveThread(
                                     file.getAbsolutePath(),
                                     ResourceFactory.asClientSockets.get(i),
-                                    transferInfoThread
+                                    transferInfoThread,
+                                    paramMap.containsKey(Constant.Param.BUFFERSIZE) ?
+                                            Integer.parseInt(paramMap.get(Constant.Param.BUFFERSIZE)) :
+                                            Constant.Param.DEFAULT_BUFFER_SIZE
                             )
                     );
                 }
@@ -109,7 +113,10 @@ public class App {
                             new ServerFileTransferThread(
                                     fileSliceInfos.get(i),
                                     ResourceFactory.asServerSockets.get(i),
-                                    transferInfoThread
+                                    transferInfoThread,
+                                    paramMap.containsKey(Constant.Param.BUFFERSIZE) ?
+                                            Integer.parseInt(paramMap.get(Constant.Param.BUFFERSIZE)) :
+                                            Constant.Param.DEFAULT_BUFFER_SIZE
                             )
                     );
                 }

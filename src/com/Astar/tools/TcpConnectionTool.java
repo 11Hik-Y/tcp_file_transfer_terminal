@@ -1,7 +1,6 @@
 package com.Astar.tools;
 
 import com.Astar.infoClass.Log;
-import com.Astar.resource.Constant;
 import com.Astar.resource.ResourceFactory;
 
 import java.io.*;

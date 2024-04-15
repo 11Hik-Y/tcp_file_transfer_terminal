@@ -13,10 +13,13 @@ public class ServerFileTransferThread implements Runnable {
 
     private final TransferInfoThread transferInfoThread;
 
-    public ServerFileTransferThread(FileSliceInfo fileSliceInfo, Socket socket, TransferInfoThread transferInfoThread) {
+    private final int bufferSize;
+
+    public ServerFileTransferThread(FileSliceInfo fileSliceInfo, Socket socket, TransferInfoThread transferInfoThread, int bufferSize) {
         this.fileSliceInfo = fileSliceInfo;
         this.socket = socket;
         this.transferInfoThread = transferInfoThread;
+        this.bufferSize = bufferSize * 1024;
     }
 
     @Override
@@ -29,6 +32,7 @@ public class ServerFileTransferThread implements Runnable {
                 // 创建缓冲输入流
                 BufferedInputStream bis = new BufferedInputStream(socket.getInputStream())
         ) {
+            System.out.println(bufferSize);
             // 直接向客户端写入FileSliceInfo对象
             oos.writeObject(fileSliceInfo);
 
@@ -41,7 +45,7 @@ public class ServerFileTransferThread implements Runnable {
             raf.seek(fileSliceInfo.getSliceStartIndex());
 
             // 缓冲区读取和发送文件
-            byte[] buffer = new byte[Constant.Param.DEFAULT_BUFFER_SIZE];
+            byte[] buffer = new byte[bufferSize];
             int len;
             long total = 0;
             while ((len = raf.read(buffer)) != -1) {

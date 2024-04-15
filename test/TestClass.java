@@ -1,5 +1,4 @@
 import com.Astar.App;
-import com.Astar.annotation.Paramable;
 import com.Astar.infoClass.FileSliceInfo;
 import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
@@ -9,7 +8,6 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class TestClass {
 
@@ -39,13 +37,15 @@ public class TestClass {
     public void serverTest() {
         App.main(new String[]{"--type=server",
                 "--slicenum=7",
-                "--path=F:\\AKI online\\Client 3.8.0\\Client.0.14.1.2.29197.zip"});
+                "--path=F:\\AKI online\\Client 3.8.0\\Client.0.14.1.2.29197.zip",
+                "--bufferSize=240"
+        });
     }
 
     @Test
     public void clientTest() {
         App.main(new String[]{"--type=client",
-                "--ip=192.168.35.1",
+                "--ip=localhost",
                 "--slicenum=7",
                 "--path=F:\\AKI online"});
     }

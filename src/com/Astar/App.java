@@ -175,14 +175,13 @@ public class App {
 
     private static void startServer() {
         // 开始启动服务端
-        boolean flag;
-        if (paramMap != null && paramMap.containsKey(Constant.Param.PORT)) {
-            // 使用传入的端口启动服务端
-            flag = TcpConnectionTool.initServer(Integer.parseInt(paramMap.get(Constant.Param.PORT)));
-        } else {
-            // 使用默认端口启动服务端
-            flag = TcpConnectionTool.initServer(Constant.Server.DEFAULT_PORT);
-        }
+        boolean flag = TcpConnectionTool.initServer(
+                paramMap != null && paramMap.containsKey(Constant.Param.PORT) ?
+                        // 使用传入的端口启动服务端
+                        Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
+                        // 使用默认端口启动服务端
+                        Constant.Server.DEFAULT_PORT
+        );
 
         // 检查是否启动成功
         if (flag) {

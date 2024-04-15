@@ -10,7 +10,6 @@ import com.Astar.threadClass.TransferInfoThread;
 import com.Astar.threadClass.ServerFileTransferThread;
 import com.Astar.tools.FileSliceTool;
 import com.Astar.tools.TcpConnectionTool;
-import com.Astar.type.ColorType;
 import com.Astar.type.TransferType;
 
 import java.io.File;

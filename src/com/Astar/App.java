@@ -180,7 +180,12 @@ public class App {
                         // 使用传入的端口启动服务端
                         Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
                         // 使用默认端口启动服务端
-                        Constant.Server.DEFAULT_PORT
+                        Constant.Server.DEFAULT_PORT,
+                        paramMap != null && paramMap.containsKey(Constant.Param.TIME_OUT) ?
+                                // 使用传入的连接超时时间启动服务端
+                                Integer.parseInt(paramMap.get(Constant.Param.TIME_OUT)) :
+                                // 使用默认连接超时时间启动服务端
+                                Constant.Server.TIME_OUT
         );
 
         // 检查是否启动成功
@@ -398,7 +403,6 @@ public class App {
                     case Constant.Param.TIME_OUT:
                         // 切片数量参数
                         paramMap.put(Constant.Param.TIME_OUT, param[1]);
-                        Constant.Server.TIME_OUT = Integer.parseInt(param[1]) * 1000;
                         break;
                     default:
                         break;

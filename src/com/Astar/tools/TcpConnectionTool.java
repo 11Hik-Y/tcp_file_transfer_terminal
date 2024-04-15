@@ -10,12 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TcpConnectionTool {
-    public static boolean initServer(int port) {
+    public static boolean initServer(int port, int timeout) {
         try {
             // 初始化服务器
             ResourceFactory.serverSocket = new ServerSocket(port);
             // 设置超时时间
-            ResourceFactory.serverSocket.setSoTimeout(Constant.Server.TIME_OUT);
+            ResourceFactory.serverSocket.setSoTimeout(timeout);
             return true;
         } catch (Exception e) {
             return false;

@@ -319,7 +319,7 @@ public class App {
     private static void initTransferFile() {
         if (paramMap != null && paramMap.containsKey(Constant.Param.PATH)) {
             // 初始化需要传输的文件
-            file = new File(paramMap.get("path"));
+            file = new File(paramMap.get(Constant.Param.PATH));
             if (!file.exists() || file.isDirectory()) {
                 file = null;
                 getFilePath();

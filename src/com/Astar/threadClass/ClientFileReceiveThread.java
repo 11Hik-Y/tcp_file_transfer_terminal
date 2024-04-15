@@ -71,7 +71,7 @@ public class ClientFileReceiveThread implements Runnable {
             }
             // 打印分片文件接收完成
             System.out.print("\r");
-            Log.info("分片文件 {} {} 接收完成\n", fileSliceInfo.getFileName(), fileSliceInfo.getSliceNum());
+            Log.info("分片文件 {} {} 接收完成\t\t\t\n", fileSliceInfo.getFileName(), fileSliceInfo.getSliceNum());
         }
     }
 }

@@ -225,7 +225,7 @@ public class App {
                     // 检测如果传入了端口，则使用传入的端口，否则使用默认端口
                     paramMap.containsKey(Constant.Param.PORT) ?
                             Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
-                            Constant.Server.DEFAULT_PORT
+                            Constant.Client.DEFAULT_PORT
             );
             ResourceFactory.asClientSockets.add(socket);
         } catch (IOException e) {
@@ -394,6 +394,11 @@ public class App {
                     case Constant.Param.SLICE_NUM:
                         // 切片数量参数
                         paramMap.put(Constant.Param.SLICE_NUM, param[1]);
+                        break;
+                    case Constant.Param.TIME_OUT:
+                        // 切片数量参数
+                        paramMap.put(Constant.Param.TIME_OUT, param[1]);
+                        Constant.Server.TIME_OUT = Integer.parseInt(param[1]) * 1000;
                         break;
                     default:
                         break;

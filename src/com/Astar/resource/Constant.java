@@ -21,6 +21,8 @@ public final class Constant {
 
         // 切片数量参数
         public static final String SLICE_NUM = "slicenum";
+        // 接收服务端超时时间，单位 s
+        public static final String TIME_OUT = "timeout";
 
         public static final String SERVER = "server";
         public static final String CLIENT = "client";
@@ -48,13 +50,11 @@ public final class Constant {
         public static final int DEFAULT_PORT = 6666;
 
         // 默认超时时间
-        public static final int TIME_OUT = 30 * 1000;
+        public static int TIME_OUT = 30 * 1000;
     }
+
     public static final class Client {
         // 默认端口
         public static final int DEFAULT_PORT = 6666;
-
-        // 默认超时时间
-        public static final int TIME_OUT = 30 * 1000;
     }
 }

@@ -32,7 +32,6 @@ public class ServerFileTransferThread implements Runnable {
                 // 创建缓冲输入流
                 BufferedInputStream bis = new BufferedInputStream(socket.getInputStream())
         ) {
-            System.out.println(bufferSize);
             // 直接向客户端写入FileSliceInfo对象
             oos.writeObject(fileSliceInfo);
 

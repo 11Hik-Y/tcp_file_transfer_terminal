@@ -1,28 +1,34 @@
 package com.Astar.resource;
 
+import com.Astar.annotation.Paramable;
+
 public final class Constant {
 
 
     public static final class Param {
         // 参数头
         public static final String PARAM_HEAD = "--";
-
         // 路径参数
+        @Paramable
         public static final String PATH = "path";
-
         // 端口号
+        @Paramable
         public static final String PORT = "port";
-
         // 主机ip
+        @Paramable
         public static final String IP = "ip";
-
         // 传输类型
-        public static final String TYPE_TRANSFER = "type";
-
+        @Paramable
+        public static final String TYPE = "type";
         // 切片数量参数
-        public static final String SLICE_NUM = "slicenum";
-        // 接收服务端超时时间，单位 s
-        public static final String TIME_OUT = "timeout";
+        @Paramable
+        public static final String SLICENUM = "sliceNum";
+        // 接收服务端超时时间，单位 ms
+        @Paramable
+        public static final String TIMEOUT = "timeout";
+        // 缓冲区参数 单位 KB
+        @Paramable
+        public static final String BUFFERSIZE = "bufferSize";
 
         public static final String SERVER = "server";
         public static final String CLIENT = "client";

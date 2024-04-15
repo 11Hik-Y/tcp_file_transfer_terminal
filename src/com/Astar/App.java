@@ -1,5 +1,6 @@
 package com.Astar;
 
+import com.Astar.annotation.Paramable;
 import com.Astar.infoClass.FileSliceInfo;
 import com.Astar.infoClass.Log;
 import com.Astar.resource.Constant;
@@ -13,6 +14,7 @@ import com.Astar.type.TransferType;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -57,8 +59,8 @@ public class App {
         }
 
         // 获取文件的切片数量
-        int sliceNum = paramMap != null && paramMap.containsKey(Constant.Param.SLICE_NUM) ?
-                Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)) :
+        int sliceNum = paramMap != null && paramMap.containsKey(Constant.Param.SLICENUM) ?
+                Integer.parseInt(paramMap.get(Constant.Param.SLICENUM)) :
                 Constant.File.DEFAULT_SLICE_NUM;
 
         // 根据传输类型选择启动服务端或者客户端
@@ -181,11 +183,11 @@ public class App {
                         Integer.parseInt(paramMap.get(Constant.Param.PORT)) :
                         // 使用默认端口启动服务端
                         Constant.Server.DEFAULT_PORT,
-                        paramMap != null && paramMap.containsKey(Constant.Param.TIME_OUT) ?
-                                // 使用传入的连接超时时间启动服务端
-                                Integer.parseInt(paramMap.get(Constant.Param.TIME_OUT)) :
-                                // 使用默认连接超时时间启动服务端
-                                Constant.Server.TIME_OUT
+                paramMap != null && paramMap.containsKey(Constant.Param.TIMEOUT) ?
+                        // 使用传入的连接超时时间启动服务端
+                        Integer.parseInt(paramMap.get(Constant.Param.TIMEOUT)) :
+                        // 使用默认连接超时时间启动服务端
+                        Constant.Server.TIME_OUT
         );
 
         // 检查是否启动成功
@@ -204,15 +206,15 @@ public class App {
         }
 
         // 已经传入主机ip，同时也传入了切片数量
-        if (paramMap != null && paramMap.containsKey(Constant.Param.IP) && paramMap.containsKey(Constant.Param.SLICE_NUM)) {
+        if (paramMap != null && paramMap.containsKey(Constant.Param.IP) && paramMap.containsKey(Constant.Param.SLICENUM)) {
             // 按照传入的切片数量创建socket
-            for (int i = 0; i < Integer.parseInt(paramMap.get(Constant.Param.SLICE_NUM)); i++) {
+            for (int i = 0; i < Integer.parseInt(paramMap.get(Constant.Param.SLICENUM)); i++) {
                 createClientSocket();
             }
         }
 
         // 已经传入主机ip，但是未传入切片数量
-        if (paramMap != null && paramMap.containsKey(Constant.Param.IP) && !paramMap.containsKey(Constant.Param.SLICE_NUM)) {
+        if (paramMap != null && paramMap.containsKey(Constant.Param.IP) && !paramMap.containsKey(Constant.Param.SLICENUM)) {
             // 按照传入的切片数量创建socket
             for (int i = 0; i < Constant.File.DEFAULT_SLICE_NUM; i++) {
                 createClientSocket();
@@ -254,8 +256,8 @@ public class App {
     }
 
     private static void initTransferType() {
-        if (paramMap != null && paramMap.containsKey(Constant.Param.TYPE_TRANSFER)) {
-            switch (paramMap.get(Constant.Param.TYPE_TRANSFER).toLowerCase()) {
+        if (paramMap != null && paramMap.containsKey(Constant.Param.TYPE)) {
+            switch (paramMap.get(Constant.Param.TYPE).toLowerCase()) {
                 case Constant.Param.SERVER:
                     transferType = TransferType.SERVER;
                     break;
@@ -376,36 +378,21 @@ public class App {
                 if (param.length != 2) {
                     continue;
                 }
-                switch (param[0].toLowerCase()) {
-                    case Constant.Param.PATH:
-                        // 文件路径参数
-                        String s = param[1].endsWith("\"") && param[1].startsWith("\"") ?
-                                param[1].substring(1, param[1].length() - 1) :
-                                param[1];
-                        paramMap.put(Constant.Param.PATH, s);
-                        break;
-                    case Constant.Param.TYPE_TRANSFER:
-                        // 传输类型参数
-                        paramMap.put(Constant.Param.TYPE_TRANSFER, param[1]);
-                        break;
-                    case Constant.Param.PORT:
-                        // 端口号参数
-                        paramMap.put(Constant.Param.PORT, param[1]);
-                        break;
-                    case Constant.Param.IP:
-                        // ip地址参数
-                        paramMap.put(Constant.Param.IP, param[1]);
-                        break;
-                    case Constant.Param.SLICE_NUM:
-                        // 切片数量参数
-                        paramMap.put(Constant.Param.SLICE_NUM, param[1]);
-                        break;
-                    case Constant.Param.TIME_OUT:
-                        // 切片数量参数
-                        paramMap.put(Constant.Param.TIME_OUT, param[1]);
-                        break;
-                    default:
-                        break;
+
+                try {
+                    Field field = Constant.Param.class.getField(param[0].toUpperCase());
+                    if (!field.isAnnotationPresent(Paramable.class)) {
+                        continue;
+                    }
+                    // 去除引号（有引号的存在可以防止空格分割了完整的参数）
+                    String s = param[1].endsWith("\"") && param[1].startsWith("\"") ?
+                            param[1].substring(1, param[1].length() - 1) :
+                            param[1];
+                    paramMap.put(String.valueOf(field.get(null)), s);
+                } catch (NoSuchFieldException e) {
+                    Log.error("{} 为未知参数\n", param[0]);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
                 }
             }
         }

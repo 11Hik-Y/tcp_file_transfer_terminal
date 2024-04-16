@@ -17,5 +17,5 @@
 - ip：服务端ip
 - slicenum：文件切片数量（默认为4，注意：客户端服务端的切片数量指定必须一致！！！）
 - timeout：服务端等待的超时时间（单位为ms）
-- bufferSize：io流使用的缓冲区大小（单位为KB 默认128 KB）
+- bufferSize：io流使用的缓冲区大小（单位为byte 默认128 * 1024 byte）
 

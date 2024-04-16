@@ -35,18 +35,30 @@ public class TestClass {
 
     @Test
     public void serverTest() {
-        App.main(new String[]{"--type=server",
-                "--slicenum=7",
-                "--path=F:\\AKI online\\Client 3.8.0\\Client.0.14.1.2.29197.zip",
+        App.main(new String[]{
+                "--type=server",
+                "--slicenum=4",
+                "--path=F:\\AKI 3.7.0\\mod\\KAT2.2.5.zip",
                 "--bufferSize=240"
         });
     }
 
     @Test
     public void clientTest() {
-        App.main(new String[]{"--type=client",
+        App.main(new String[]{
+                "--type=client",
                 "--ip=localhost",
-                "--slicenum=7",
-                "--path=F:\\AKI online"});
+                "--slicenum=4",
+                "--path=F:\\AKI 3.7.0"
+        });
+    }
+
+    @Test
+    public void serverTest2() {
+        App.main(new String[]{
+                "--type=server",
+                "--path=F:\\AKI 3.7.0\\mod\\ATLAS-GEAR_1.0.4.zip",
+                "--timeout=6000000"
+        });
     }
 }

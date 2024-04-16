@@ -19,7 +19,7 @@ public class ServerFileTransferThread implements Runnable {
         this.fileSliceInfo = fileSliceInfo;
         this.socket = socket;
         this.transferInfoThread = transferInfoThread;
-        this.bufferSize = bufferSize * 1024;
+        this.bufferSize = bufferSize;
     }
 
     @Override
